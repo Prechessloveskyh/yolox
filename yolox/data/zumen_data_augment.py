@@ -9,11 +9,11 @@ The data augmentation procedures were interpreted from @weiliu89's SSD paper
 http://arxiv.org/abs/1512.02325
 """
 import copy
-import random
 
 import albumentations as A
 import cv2
 import numpy as np
+
 from yolox.utils import xyxy2cxcywh
 
 
@@ -32,70 +32,6 @@ def box_candidates(box1, box2, wh_thr=2, ar_thr=20, area_thr=0.2):
     )  # candidates
 
 
-def _distort(image):
-    def _convert(image, alpha=1, beta=0):
-        tmp = image.astype(float) * alpha + beta
-        tmp[tmp < 0] = 0
-        tmp[tmp > 255] = 255
-        image[:] = tmp
-
-    image = image.copy()
-
-    if random.randrange(2):
-        _convert(image, beta=random.uniform(-32, 32))
-
-    if random.randrange(2):
-        _convert(image, alpha=random.uniform(0.5, 1.5))
-
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    if random.randrange(2):
-        tmp = image[:, :, 0].astype(int) + random.randint(-18, 18)
-        tmp %= 180
-        image[:, :, 0] = tmp
-
-    if random.randrange(2):
-        _convert(image[:, :, 1], alpha=random.uniform(0.5, 1.5))
-
-    image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
-
-    return image
-
-
-def _mirror(image, boxes):
-    _, width, _ = image.shape
-    if random.randrange(2):
-        image = image[:, ::-1]
-        boxes = boxes.copy()
-        boxes[:, 0::2] = width - boxes[:, 2::-2]
-    return image, boxes
-
-
-def preproc(image, input_size, mean, std, swap=(2, 0, 1)):
-    if len(image.shape) == 3:
-        padded_img = np.ones((input_size[0], input_size[1], 3)) * 114.0
-    else:
-        padded_img = np.ones(input_size) * 114.0
-    img = np.array(image)
-    r = min(input_size[0] / img.shape[0], input_size[1] / img.shape[1])
-    resized_img = cv2.resize(
-        img,
-        (int(img.shape[1] * r), int(img.shape[0] * r)),
-        interpolation=cv2.INTER_LINEAR,
-    ).astype(np.float32)
-    padded_img[: int(img.shape[0] * r), : int(img.shape[1] * r)] = resized_img
-
-    padded_img = padded_img[:, :, ::-1]
-    padded_img /= 255.0
-    if mean is not None:
-        padded_img -= mean
-    if std is not None:
-        padded_img /= std
-    padded_img = padded_img.transpose(swap)
-    padded_img = np.ascontiguousarray(padded_img, dtype=np.float32)
-    return padded_img, r
-
-
 def xyxy2xywh(boxes):
     return np.array([[x1, y1, x2 - x1, y2 - y1]
                      for x1, y1, x2, y2 in boxes])
@@ -107,7 +43,7 @@ def xywh2xyxy(boxes):
 
 
 class TrainTransform:
-    def __init__(self, p=0.5, rgb_means=None, std=None, max_labels=50):
+    def __init__(self, p=0.5, rgb_means=None, std=None, max_labels=20):
         self.means = rgb_means
         self.std = std
         self.p = p
@@ -146,28 +82,26 @@ class TrainTransform:
             for
             x, y, w, h in boxes])
         padded_labels = np.zeros((self.max_labels, 5))
-        try:
-            transformed = self.transform(image=image_t,
-                                         bboxes=boxes,
-                                         class_labels=labels)
-            image_t = transformed['image']
-            boxes = np.array(transformed['bboxes'])
-            labels = np.array(transformed['class_labels'])
-            boxes = xywh2xyxy(boxes)
-            boxes = np.int64(boxes)
-            boxes = xyxy2cxcywh(boxes)
-            mask_b = np.minimum(boxes[:, 2], boxes[:, 3]) > 8
-            boxes_t = boxes[mask_b]
-            labels_t = labels[mask_b]
+        transformed = self.transform(image=image_t,
+                                     bboxes=boxes,
+                                     class_labels=labels)
+        image_t = transformed['image']
+        boxes = np.array(transformed['bboxes'])
+        labels = np.array(transformed['class_labels'])
+        boxes = xywh2xyxy(boxes)
+        boxes = np.int64(boxes)
+        boxes = xyxy2cxcywh(boxes)
+        mask_b = np.minimum(boxes[:, 2], boxes[:, 3]) > 8
+        boxes_t = boxes[mask_b]
+        labels_t = labels[mask_b]
 
-            labels_t = np.expand_dims(labels_t, 1)
-            targets_t = np.hstack((labels_t, boxes_t))
-            padded_labels[range(len(targets_t))[: self.max_labels]] = targets_t[: self.max_labels]
-            padded_labels = np.ascontiguousarray(padded_labels, dtype=np.float32)
-            image_t = image.transpose(self.swap)
-            image_t = np.ascontiguousarray(image_t, dtype=np.float32)
-        except Exception as ex:
-            print(ex)
+        labels_t = np.expand_dims(labels_t, 1)
+        targets_t = np.hstack((labels_t, boxes_t))
+        padded_labels[range(len(targets_t))[: self.max_labels]] = targets_t[: self.max_labels]
+        padded_labels = np.ascontiguousarray(padded_labels, dtype=np.float32)
+        image_t = image.transpose(self.swap)
+        image_t = np.ascontiguousarray(image_t, dtype=np.float32)
+        print(image_t, padded_labels)
         return image_t, padded_labels
 
 
