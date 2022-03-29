@@ -43,7 +43,7 @@ class Exp(BaseExp):
         # --------------  training config --------------------- #
         self.warmup_epochs = 5
         self.max_epoch = 300
-        self.warmup_lr = 0
+        self.warmup_lr = 0.01
         self.basic_lr_per_img = 0.01 / 8.0
         self.scheduler = "yoloxwarmcos"
         self.no_aug_epochs = 15
@@ -156,9 +156,11 @@ class Exp(BaseExp):
                 elif hasattr(v, "weight") and isinstance(v.weight, nn.Parameter):
                     pg1.append(v.weight)  # apply decay
 
-            optimizer = torch.optim.SGD(
-                pg0, lr=lr, momentum=self.momentum, nesterov=True
-            )
+            # optimizer = torch.optim.SGD(
+            #     pg0, lr=lr, momentum=self.momentum, nesterov=True
+            # )
+            optimizer = torch.optim.Adam(
+               params=pg0, lr=lr, betas=(0.9, 0.99))
             optimizer.add_param_group(
                 {"params": pg1, "weight_decay": self.weight_decay}
             )  # add pg1 with weight_decay
