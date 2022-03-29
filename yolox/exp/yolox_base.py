@@ -24,7 +24,7 @@ class Exp(BaseExp):
         # ---------------- dataloader config ---------------- #
         # set worker to 4 for shorter dataloader init time
         self.data_num_workers = 1
-        self.input_size = (2048, 2048)
+        self.input_size = (1080, 1920)
         self.random_size = None
         self.train_ann = "3.json"
         self.val_ann = "3.json"
@@ -57,7 +57,7 @@ class Exp(BaseExp):
         self.exp_name = os.path.split(os.path.realpath(__file__))[1].split(".")[0]
 
         # -----------------  testing config ------------------ #
-        self.test_size = (2048, 2048)
+        self.test_size = (1080, 1920)
         self.test_conf = 0.01
         self.nmsthre = 0.65
 
