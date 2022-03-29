@@ -33,6 +33,7 @@ class Exp(MyExp):
             json_file=self.train_ann,
             img_size=self.input_size,
             preproc=TrainTransform(
+                image_size=self.input_size,
                 rgb_means=(0.485, 0.456, 0.406),
                 std=(0.229, 0.224, 0.225),
                 max_labels=50,
@@ -73,6 +74,7 @@ class Exp(MyExp):
             json_file=self.train_ann,
             img_size=self.input_size,
             preproc=ValTransform(
+                image_size=self.input_size,
                 rgb_means=(0.485, 0.456, 0.406),
                 std=(0.229, 0.224, 0.225)
             ),

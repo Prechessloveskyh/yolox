@@ -43,7 +43,8 @@ def xywh2xyxy(boxes):
 
 
 class TrainTransform:
-    def __init__(self, p=0.5, rgb_means=None, std=None, max_labels=30):
+    def __init__(self, image_size, p=0.5, rgb_means=None, std=None, max_labels=30):
+        self.image_size = image_size
         self.means = rgb_means
         self.std = std
         self.p = p
@@ -52,9 +53,9 @@ class TrainTransform:
             A.GaussianBlur(blur_limit=(3, 7), p=0.2),
             A.HorizontalFlip(p=0.4),
             A.VerticalFlip(p=0.4),
-            A.RandomCrop(height=2048, width=2048,
+            A.RandomCrop(height=self.image_size[0], width=self.image_size[1],
                          always_apply=False, p=0.1),
-            A.Resize(height=2048, width=2048,
+            A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std)
@@ -64,7 +65,7 @@ class TrainTransform:
             A.GaussianBlur(blur_limit=(3, 7), p=0.2),
             A.HorizontalFlip(p=0.4),
             A.VerticalFlip(p=0.4),
-            A.Resize(height=2048, width=2048,
+            A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std)
@@ -146,12 +147,13 @@ class ValTransform:
         data
     """
 
-    def __init__(self, rgb_means=None, std=None, swap=(2, 0, 1)):
+    def __init__(self, image_size, rgb_means=None, std=None, swap=(2, 0, 1)):
+        self.image_size = image_size
         self.means = rgb_means
         self.swap = swap
         self.std = std
         self.transform = A.Compose([
-            A.Resize(height=2048, width=2048,
+            A.Resize(height=image_size[0], width=image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std, always_apply=True)
