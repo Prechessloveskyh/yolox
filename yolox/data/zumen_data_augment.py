@@ -74,6 +74,10 @@ class TrainTransform:
         self.swap = (2, 0, 1)
 
     def __call__(self, image, targets, input_dim):
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image[image != 255] = 0
+        _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV)
+        image = np.stack([image] * 3, axis=2).astype(np.uint8)
         boxes = targets[:, :4].copy()
         labels = targets[:, 4].copy()
         boxes = xyxy2xywh(boxes)
