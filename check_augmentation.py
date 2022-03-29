@@ -117,14 +117,20 @@ with open(os.path.join('data', 'annotations', '3.json')) as ff:
     data = json.loads(ff.read())
 images = data['images']
 annotations = data['annotations']
+print(len(images))
 for image in images:
     id = image['id']
     file_name = image['file_name']
     file_path = os.path.join('data', 'images', '3', file_name)
     image = cv2.imread(file_path)
-    bbox = np.array([ann['bbox'] for ann in annotations if ann['image_id'] == id])
-    category_id = np.array([ann['category_id'] for ann in annotations if ann['image_id'] == id])
-    # category_id=np.expand_dims(category_id, axis=1)
-    target = np.array([[x, y, w, h, t] for (x, y, w, h), t in zip(bbox, category_id)])
-    # target = np.stack([bbox, category_id], axis=0)
-    preproc(image, target)
+    # if not os.path.exists(file_path):
+    #     print(file_path)
+    if image is None:
+        print(file_path)
+
+# bbox = np.array([ann['bbox'] for ann in annotations if ann['image_id'] == id])
+# category_id = np.array([ann['category_id'] for ann in annotations if ann['image_id'] == id])
+# # category_id=np.expand_dims(category_id, axis=1)
+# target = np.array([[x, y, w, h, t] for (x, y, w, h), t in zip(bbox, category_id)])
+# # target = np.stack([bbox, category_id], axis=0)
+# preproc(image, target)

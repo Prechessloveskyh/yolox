@@ -129,37 +129,20 @@ class TrainTransform:
         boxes = targets[:, :4].copy()
         labels = targets[:, 4].copy()
         boxes = xyxy2xywh(boxes)
-
-        immm = copy.deepcopy(image)
-        boxes1 = np.int64(boxes)
-        for x, y, w, h in boxes1:
-            cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
-        cv2.imwrite('original.png', immm)
+        # boxes1 = np.int64(boxes)
+        # for x, y, w, h in boxes1:
+        #     cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
+        # cv2.imwrite('original.png', immm)
         if len(boxes) == 0:
             targets = np.zeros((self.max_labels, 5), dtype=np.float32)
             transformed = self.transform(image=image,
                                          bboxes=boxes,
                                          class_labels=labels)
             image = transformed['image']
-            # boxes = transformed['bboxes']
-            # labels = transformed['class_labels']
             image = np.ascontiguousarray(image, dtype=np.float32)
             return image, targets
 
-        # image_o = image.copy()
-        # targets_o = targets.copy()
-        # height_o, width_o, _ = image_o.shape
-        # boxes_o = targets_o[:, :4]
-        # labels_o = targets_o[:, 4]
-        # bbox_o: [xyxy] to [c_x,c_y,w,h]
-        # boxes_o = xyxy2cxcywh(boxes)
-
-        # cv2.imwrite('original.png', image)
         image_t = copy.deepcopy(image)
-        # image_t = _distort(image)
-        # cv2.imwrite('_distort.png', image_t)
-        # image_t, boxes = _mirror(image_t, boxes)
-        # cv2.imwrite('_mirror.png', image_t)
         height, width, _ = image_t.shape
         boxes = np.array([
             [x, y, w if x + w <= width else width - x, h if y + h <= height else height - y]
@@ -172,29 +155,19 @@ class TrainTransform:
             image_t = transformed['image']
             boxes = np.array(transformed['bboxes'])
             labels = np.array(transformed['class_labels'])
-            image_t *= 255
-            immm = np.array(image_t).astype(np.uint8)
-            boxes1 = np.int64(boxes)
-            for x, y, w, h in boxes1:
-                cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
-            cv2.imwrite('image_t.png', immm)
+            # image_t *= 255
+            # immm = np.array(image_t).astype(np.uint8)
+            # boxes1 = np.int64(boxes)
+            # for x, y, w, h in boxes1:
+            #     cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
+            # cv2.imwrite('image_t.png', immm)
             boxes = xywh2xyxy(boxes)
             boxes = np.int64(boxes)
             boxes = xyxy2cxcywh(boxes)
             mask_b = np.minimum(boxes[:, 2], boxes[:, 3]) > 8
             boxes_t = boxes[mask_b]
             labels_t = labels[mask_b]
-            # if len(boxes_t) == 0:
-            #     # image_t, r_o = preproc(image_o, input_dim, self.means, self.std)
-            #     # boxes_o *= r_o
-            #     # boxes_t = boxes_o
-            #     # labels_t = labels_o
-            #     transformed = self.transform(image=image_o,
-            #                                  bboxes=boxes_o,
-            #                                  class_labels=labels)
-            #     image_t = transformed['image']
-            #     boxes_t = transformed['bboxes']
-            #     labels_t = transformed['class_labels']
+
             labels_t = np.expand_dims(labels_t, 1)
             targets_t = np.hstack((labels_t, boxes_t))
             padded_labels = np.zeros((self.max_labels, 5))
