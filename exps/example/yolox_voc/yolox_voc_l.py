@@ -62,13 +62,19 @@ class Exp(MyExp):
     def get_eval_loader(self, batch_size, is_distributed, testdev=False):
         from yolox.data import VOCDetection, ValTransform
 
-        valdataset = VOCDetection(
-            data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
-            image_sets=[('2007', 'test')],
-            img_size=self.test_size,
+        from yolox.data import (
+            COCODataset,
+        )
+        from yolox.data.zumen_data_augment import ValTransform
+
+        valdataset = COCODataset(
+            data_dir=self.data_dir,
+            name=self.name,
+            json_file=self.train_ann,
+            img_size=self.input_size,
             preproc=ValTransform(
                 rgb_means=(0.485, 0.456, 0.406),
-                std=(0.229, 0.224, 0.225),
+                std=(0.229, 0.224, 0.225)
             ),
         )
 
@@ -91,10 +97,10 @@ class Exp(MyExp):
         return val_loader
 
     def get_evaluator(self, batch_size, is_distributed, testdev=False):
-        from yolox.evaluators import VOCEvaluator
+        from yolox.evaluators import COCOEvaluator
 
         val_loader = self.get_eval_loader(batch_size, is_distributed, testdev=testdev)
-        evaluator = VOCEvaluator(
+        evaluator = COCOEvaluator(
             dataloader=val_loader,
             img_size=self.test_size,
             confthre=self.test_conf,

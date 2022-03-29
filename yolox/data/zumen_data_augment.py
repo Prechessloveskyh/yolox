@@ -113,26 +113,23 @@ class TrainTransform:
         self.p = p
         self.max_labels = max_labels
         self.transform = A.Compose([
-            A.GaussianBlur(blur_limit=(3, 7), p=0.6),
-            A.HorizontalFlip(p=0.5),
-            A.VerticalFlip(p=0.5),
+            A.GaussianBlur(blur_limit=(3, 7), p=0.2),
+            A.HorizontalFlip(p=0.4),
+            A.VerticalFlip(p=0.4),
             A.RandomCrop(height=2048, width=2048,
-                         always_apply=False, p=0.0),
+                         always_apply=False, p=0.1),
             A.Resize(height=2048, width=2048,
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
-            # A.Normalize(mean=rgb_means, std=std)
+            A.Normalize(mean=rgb_means, std=std)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.5, label_fields=['class_labels']))
+        self.swap = (2, 0, 1)
 
     def __call__(self, image, targets, input_dim):
         boxes = targets[:, :4].copy()
         labels = targets[:, 4].copy()
         boxes = xyxy2xywh(boxes)
-        # boxes1 = np.int64(boxes)
-        # for x, y, w, h in boxes1:
-        #     cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
-        # cv2.imwrite('original.png', immm)
         if len(boxes) == 0:
             targets = np.zeros((self.max_labels, 5), dtype=np.float32)
             transformed = self.transform(image=image,
@@ -148,6 +145,7 @@ class TrainTransform:
             [x, y, w if x + w <= width else width - x, h if y + h <= height else height - y]
             for
             x, y, w, h in boxes])
+        padded_labels = np.zeros((self.max_labels, 5))
         try:
             transformed = self.transform(image=image_t,
                                          bboxes=boxes,
@@ -155,12 +153,6 @@ class TrainTransform:
             image_t = transformed['image']
             boxes = np.array(transformed['bboxes'])
             labels = np.array(transformed['class_labels'])
-            # image_t *= 255
-            # immm = np.array(image_t).astype(np.uint8)
-            # boxes1 = np.int64(boxes)
-            # for x, y, w, h in boxes1:
-            #     cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
-            # cv2.imwrite('image_t.png', immm)
             boxes = xywh2xyxy(boxes)
             boxes = np.int64(boxes)
             boxes = xyxy2cxcywh(boxes)
@@ -170,9 +162,9 @@ class TrainTransform:
 
             labels_t = np.expand_dims(labels_t, 1)
             targets_t = np.hstack((labels_t, boxes_t))
-            padded_labels = np.zeros((self.max_labels, 5))
             padded_labels[range(len(targets_t))[: self.max_labels]] = targets_t[: self.max_labels]
             padded_labels = np.ascontiguousarray(padded_labels, dtype=np.float32)
+            image_t = image.transpose(self.swap)
             image_t = np.ascontiguousarray(image_t, dtype=np.float32)
         except Exception as ex:
             print(ex)
@@ -212,4 +204,6 @@ class ValTransform:
     def __call__(self, img, res, input_size):
         transformed = self.transform(image=img)
         img = transformed['image']
+        img = img.transpose(self.swap)
+        img = np.ascontiguousarray(img, dtype=np.float32)
         return img, np.zeros((1, 5))
