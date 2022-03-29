@@ -1,6 +1,7 @@
 ### Linux ###
 *~
-
+*.png
+*.jpg
 # user experiments directory
 YOLOX_outputs/
 #datasets/

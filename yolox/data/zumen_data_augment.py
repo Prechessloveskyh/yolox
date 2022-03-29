@@ -82,6 +82,7 @@ class TrainTransform:
                                          bboxes=boxes,
                                          class_labels=labels)
             image = transformed['image']
+            image = image.transpose(self.swap)
             image = np.ascontiguousarray(image, dtype=np.float32)
             return image, targets
 
@@ -110,6 +111,7 @@ class TrainTransform:
             image_t = transformed['image']
             boxes = np.array(transformed['bboxes'])
             labels = np.array(transformed['class_labels'])
+
         boxes = xywh2xyxy(boxes)
         boxes = np.int64(boxes)
         boxes = xyxy2cxcywh(boxes)
