@@ -23,7 +23,7 @@ class TrainTransform:
             A.Resize(height=2048, width=2048,
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
-            # A.Normalize(mean=rgb_means, std=std)
+            A.Normalize(mean=rgb_means, std=std)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.5, label_fields=['class_labels']))
 
@@ -68,12 +68,12 @@ class TrainTransform:
             image_t = transformed['image']
             boxes = transformed['bboxes']
             labels = transformed['class_labels']
-            image_t *= 255
-            immm = np.array(image_t).astype(np.uint8)
-            boxes1 = np.int64(boxes)
-            for x, y, w, h in boxes1:
-                cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
-            cv2.imwrite('image_t.png', immm)
+            # image_t *= 255
+            # immm = np.array(image_t).astype(np.uint8)
+            # boxes1 = np.int64(boxes)
+            # for x, y, w, h in boxes1:
+            #     cv2.rectangle(immm, (x, y), (x + w, y + h), (255, 0, 0), 5)
+            # cv2.imwrite('image_t.png', immm)
         except Exception as ex:
             print(ex)
         # # boxes = xyxy2cxcywh(boxes)
@@ -125,12 +125,12 @@ for image in images:
     image = cv2.imread(file_path)
     # if not os.path.exists(file_path):
     #     print(file_path)
-    if image is None:
-        print(file_path)
+    # if image is None:
+    #     print(file_path)
 
-# bbox = np.array([ann['bbox'] for ann in annotations if ann['image_id'] == id])
-# category_id = np.array([ann['category_id'] for ann in annotations if ann['image_id'] == id])
-# # category_id=np.expand_dims(category_id, axis=1)
-# target = np.array([[x, y, w, h, t] for (x, y, w, h), t in zip(bbox, category_id)])
-# # target = np.stack([bbox, category_id], axis=0)
-# preproc(image, target)
+    bbox = np.array([ann['bbox'] for ann in annotations if ann['image_id'] == id])
+    category_id = np.array([ann['category_id'] for ann in annotations if ann['image_id'] == id])
+    # category_id=np.expand_dims(category_id, axis=1)
+    target = np.array([[x, y, w, h, t] for (x, y, w, h), t in zip(bbox, category_id)])
+    # target = np.stack([bbox, category_id], axis=0)
+    preproc(image, target)
