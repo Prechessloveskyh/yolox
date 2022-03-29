@@ -20,9 +20,6 @@ class Exp(BaseExp):
         self.num_classes = 3
         self.depth = 1.00
         self.width = 1.00
-        git
-        commit - m
-        'image size has been changed'
 
         # ---------------- dataloader config ---------------- #
         # set worker to 4 for shorter dataloader init time
