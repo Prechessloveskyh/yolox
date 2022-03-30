@@ -95,9 +95,9 @@ class Trainer:
         targets = targets.to(self.data_type)
         targets.requires_grad = False
         data_end_time = time.time()
-        print('*' * 50)
-        print(inps)
-        print(targets)
+        # print('*' * 50)
+        # print(inps)
+        # print(targets)
         outputs = self.model(inps, targets)
         loss = outputs["total_loss"]
 
