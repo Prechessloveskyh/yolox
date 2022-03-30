@@ -63,15 +63,20 @@ class Exp(MyExp):
         return train_loader
 
     def get_eval_loader(self, batch_size, is_distributed, testdev=False):
-        from yolox.data import VOCDetection, ValTransform
+        from yolox.data import (
+            COCODataset,
+        )
+        from yolox.data.zumen_data_augment import ValTransform
 
-        valdataset = VOCDetection(
-            data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
-            image_sets=[('2007', 'test')],
-            img_size=self.test_size,
+        valdataset = COCODataset(
+            data_dir=self.data_dir,
+            name=self.name,
+            json_file=self.train_ann,
+            img_size=self.input_size,
             preproc=ValTransform(
+                image_size=self.input_size,
                 rgb_means=(0.485, 0.456, 0.406),
-                std=(0.229, 0.224, 0.225),
+                std=(0.229, 0.224, 0.225)
             ),
         )
 

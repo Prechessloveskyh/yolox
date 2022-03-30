@@ -103,8 +103,8 @@ def own_make_parser():
     parser.add_argument("-b", "--batch-size", type=int, default=8, help="batch size")
     parser.add_argument(
         "--devices",
-        # default=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
-        default=None,
+        default=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+        # default=None,
         help="device for training"
     )
     parser.add_argument(
@@ -112,8 +112,8 @@ def own_make_parser():
     )
     parser.add_argument(
         "--exp_file",
-        # default='exps/example/yolox_voc/yolox_voc_l_with_old_auq.py',
-        default='exps/example/yolox_voc/yolox_voc_l.py',
+        default='exps/example/yolox_voc/yolox_voc_l_with_old_auq.py',
+        # default='exps/example/yolox_voc/yolox_voc_l.py',
         type=str,
         help="plz input your expriment description file",
     )
@@ -136,6 +136,7 @@ def own_make_parser():
     parser.add_argument(
         "--fp16",
         dest="fp16",
+        # default=False,
         default=True,
         action="store_true",
         help="Adopting mix precision training.",
@@ -185,7 +186,7 @@ if __name__ == "__main__":
         args.experiment_name = exp.exp_name
 
     num_gpu = torch.cuda.device_count() if args.devices is None else args.devices
-    assert num_gpu <= torch.cuda.device_count()
+    # assert num_gpu <= torch.cuda.device_count()
 
     launch(
         main,
