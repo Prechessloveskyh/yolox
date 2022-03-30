@@ -61,8 +61,6 @@ class Exp(MyExp):
         return train_loader
 
     def get_eval_loader(self, batch_size, is_distributed, testdev=False):
-        from yolox.data import VOCDetection, ValTransform
-
         from yolox.data import (
             COCODataset,
         )

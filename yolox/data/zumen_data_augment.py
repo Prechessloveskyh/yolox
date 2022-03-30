@@ -43,7 +43,7 @@ def xywh2xyxy(boxes):
 
 
 class TrainTransform:
-    def __init__(self, image_size, p=0.5, rgb_means=None, std=None, max_labels=30):
+    def __init__(self, image_size, p=0.5, rgb_means=None, std=None, max_labels=50):
         self.image_size = image_size
         self.means = rgb_means
         self.std = std
@@ -58,7 +58,7 @@ class TrainTransform:
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
-            A.Normalize(mean=rgb_means, std=std)
+            # A.Normalize(mean=rgb_means, std=std)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.5, label_fields=['class_labels']))
         self.truncated_transform = A.Compose([
@@ -68,7 +68,7 @@ class TrainTransform:
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
-            A.Normalize(mean=rgb_means, std=std)
+            # A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.5, label_fields=['class_labels']))
         self.swap = (2, 0, 1)
@@ -128,6 +128,12 @@ class TrainTransform:
         targets_t = np.hstack((labels_t, boxes_t))
         padded_labels[range(len(targets_t))[: self.max_labels]] = targets_t[: self.max_labels]
         padded_labels = np.ascontiguousarray(padded_labels, dtype=np.float32)
+        # image_t += np.min(image_t)
+        # image_t /= (np.max(image_t) - np.min(image_t))
+        # image = copy.deepcopy(image_t)
+        # image *= 255
+        # image = np.array(image).astype(np.uint8)
+        # cv2.imwrite('image.png', image)
         image_t = image_t.transpose(self.swap)
         image_t = np.ascontiguousarray(image_t, dtype=np.float32)
         return image_t, padded_labels

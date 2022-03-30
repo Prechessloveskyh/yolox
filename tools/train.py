@@ -112,8 +112,8 @@ def own_make_parser():
     )
     parser.add_argument(
         "--exp_file",
-        default='exps/example/yolox_voc/yolox_voc_l_with_old_auq.py',
-        # default='exps/example/yolox_voc/yolox_voc_l.py',
+        # default='exps/example/yolox_coco_l_with_old_auq.py',
+        default='exps/example/yolox_coco_l.py',
         type=str,
         help="plz input your expriment description file",
     )
