@@ -58,7 +58,7 @@ class TrainTransform:
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
-            # A.Normalize(mean=rgb_means, std=std)
+            A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.5, label_fields=['class_labels']))
         self.truncated_transform = A.Compose([
@@ -68,7 +68,7 @@ class TrainTransform:
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
             A.ToFloat(max_value=255, always_apply=True),
-            # A.Normalize(mean=rgb_means, std=std, always_apply=True)
+            A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.5, label_fields=['class_labels']))
         self.swap = (2, 0, 1)
