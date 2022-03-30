@@ -103,8 +103,8 @@ def own_make_parser():
     parser.add_argument("-b", "--batch-size", type=int, default=8, help="batch size")
     parser.add_argument(
         "--devices",
-        default=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
-        # default=None,
+        # default=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+        default=None,
         help="device for training"
     )
     parser.add_argument(

@@ -39,6 +39,22 @@ class Exp(MyExp):
                 max_labels=50,
             ),
         )
+        dataset = MosaicDetection(
+            dataset,
+            mosaic=not no_aug,
+            img_size=self.input_size,
+            preproc=TrainTransform(
+                rgb_means=(0.485, 0.456, 0.406),
+                std=(0.229, 0.224, 0.225),
+                max_labels=120,
+            ),
+            degrees=self.degrees,
+            translate=self.translate,
+            scale=self.scale,
+            shear=self.shear,
+            perspective=self.perspective,
+            enable_mixup=self.enable_mixup,
+        )
         self.dataset = dataset
 
         if is_distributed:
@@ -66,6 +82,7 @@ class Exp(MyExp):
         from yolox.data import (
             COCODataset,
         )
+
         from yolox.data.zumen_data_augment import ValTransform
 
         valdataset = COCODataset(
