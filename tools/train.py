@@ -30,7 +30,7 @@ def make_parser():
         type=str,
         help="url used to set up distributed training",
     )
-    parser.add_argument("-b", "--batch-size", type=int, default=64, help="batch size")
+    parser.add_argument("-b", "--batch-size", type=int, default=8, help="batch size")
     parser.add_argument(
         "-d", "--devices", default=None, type=int, help="device for training"
     )
@@ -100,11 +100,12 @@ def own_make_parser():
         type=str,
         help="url used to set up distributed training",
     )
-    parser.add_argument("-b", "--batch-size", type=int, default=32, help="batch size")
+    parser.add_argument("-b", "--batch-size", type=int, default=8, help="batch size")
     parser.add_argument(
-        "--devices", default=torch.device(
-            'cuda' if torch.cuda.is_available() else 'cpu'
-        ), help="device for training"
+        "--devices",
+        # default=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+        default=None,
+        help="device for training"
     )
     parser.add_argument(
         "--local_rank", default=0, type=int, help="local rank for dist training"
@@ -135,7 +136,7 @@ def own_make_parser():
     parser.add_argument(
         "--fp16",
         dest="fp16",
-        default=False,
+        default=True,
         action="store_true",
         help="Adopting mix precision training.",
     )
@@ -184,7 +185,7 @@ if __name__ == "__main__":
         args.experiment_name = exp.exp_name
 
     num_gpu = torch.cuda.device_count() if args.devices is None else args.devices
-    # assert num_gpu <= torch.cuda.device_count()
+    assert num_gpu <= torch.cuda.device_count()
 
     launch(
         main,

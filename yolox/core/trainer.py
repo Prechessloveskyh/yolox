@@ -43,7 +43,8 @@ class Trainer:
         self.is_distributed = get_world_size() > 1
         self.rank = get_rank()
         self.local_rank = args.local_rank
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        # self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = "cuda:{}".format(self.local_rank)
         self.use_model_ema = exp.ema
 
         # data/dataloader related attr
@@ -132,7 +133,7 @@ class Trainer:
             "Model Summary: {}".format(get_model_info(model, self.exp.test_size))
         )
         model.to(self.device)
-
+        print(self.device)
         # solver related init
         self.optimizer = self.exp.get_optimizer(self.args.batch_size)
 

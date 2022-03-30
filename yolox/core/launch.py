@@ -56,8 +56,10 @@ def launch(
                        Can be set to auto to automatically select a free port on localhost
         args (tuple): arguments passed to main_func
     """
-    # world_size = num_machines * num_gpus_per_machine
-    world_size = 0
+    if isinstance(num_gpus_per_machine, int):
+        world_size = num_machines * num_gpus_per_machine
+    else:
+        world_size = 1
     if world_size > 1:
         if int(os.environ.get("WORLD_SIZE", "1")) > 1:
             dist_url = "{}:{}".format(
