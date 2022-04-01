@@ -50,25 +50,25 @@ class TrainTransform:
         self.p = p
         self.max_labels = max_labels
         self.transform = A.Compose([
-            A.GaussianBlur(blur_limit=(3, 7), p=0.2),
-            A.HorizontalFlip(p=0.4),
-            A.VerticalFlip(p=0.4),
+            A.GaussianBlur(blur_limit=(3, 7), p=0.1),
+            A.HorizontalFlip(p=0.1),
+            A.VerticalFlip(p=0.1),
             A.RandomCrop(height=self.image_size[0], width=self.image_size[1],
-                         always_apply=False, p=0.1),
+                         always_apply=False, p=0.05),
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
-            A.ImageCompression(quality_lower=75, p=0.1),
+            A.ImageCompression(quality_lower=85, p=0.1),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.4, label_fields=['class_labels']))
         self.truncated_transform = A.Compose([
-            A.GaussianBlur(blur_limit=(3, 7), p=0.2),
-            A.HorizontalFlip(p=0.4),
-            A.VerticalFlip(p=0.4),
+            A.GaussianBlur(blur_limit=(3, 7), p=0.1),
+            A.HorizontalFlip(p=0.1),
+            A.VerticalFlip(p=0.1),
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
-            A.ImageCompression(quality_lower=75, p=0.1),
+            A.ImageCompression(quality_lower=85, p=0.1),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
