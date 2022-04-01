@@ -28,7 +28,7 @@ class Exp(BaseExp):
         self.random_size = None
         self.train_ann = "train_data.json"
         self.val_ann = "test_data.json"
-        self.data_dir = os.path.join('..', 'yolo5', 'datav5', 'zumen')
+        self.data_dir = os.path.join('..', 'yolov5', 'datav5', 'zumen')
         self.name = os.path.join('train', 'images')
         self.val_name = os.path.join('test', 'images')
 
