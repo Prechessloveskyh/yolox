@@ -45,6 +45,7 @@ class Exp(BaseExp):
         self.warmup_epochs = 5
         self.max_epoch = 300
         self.warmup_lr = 0.01
+        self.learning_rate = 0.001
         self.basic_lr_per_img = 0.01 / 8.0
         self.scheduler = "yoloxwarmcos"
         self.no_aug_epochs = 15
@@ -142,11 +143,11 @@ class Exp(BaseExp):
 
     def get_optimizer(self, batch_size):
         if "optimizer" not in self.__dict__:
-            if self.warmup_epochs > 0:
-                lr = self.warmup_lr
-            else:
-                lr = self.basic_lr_per_img * batch_size
-
+            # if self.warmup_epochs > 0:
+            #     lr = self.warmup_lr
+            # else:
+            #     lr = self.basic_lr_per_img * batch_size
+            lr = self.learning_rate
             pg0, pg1, pg2 = [], [], []  # optimizer parameter groups
 
             for k, v in self.model.named_modules():

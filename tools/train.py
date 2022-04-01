@@ -100,6 +100,7 @@ def own_make_parser():
         type=str,
         help="url used to set up distributed training",
     )
+    parser.add_argument("-lr", "--learning-rate", type=float, default=0.01, help="learning-rate")
     parser.add_argument("-b", "--batch-size", type=int, default=8, help="batch size")
     parser.add_argument(
         "--devices",
