@@ -148,9 +148,9 @@ class YOLOXHead(nn.Module):
             )
 
         self.use_l1 = False
-        self.l1_loss = nn.L1Loss(reduction="mean")
-        self.bcewithlog_loss = FocalLoss(nn.BCEWithLogitsLoss(reduction="mean"))
-        self.iou_loss = IOUloss(reduction="mean")
+        self.l1_loss = nn.L1Loss(reduction="none")
+        self.bcewithlog_loss = FocalLoss(nn.BCEWithLogitsLoss(reduction="none"))
+        self.iou_loss = IOUloss(reduction="none")
         self.strides = strides
         self.grids = [torch.zeros(1)] * len(in_channels)
         self.expanded_strides = [None] * len(in_channels)
