@@ -27,11 +27,11 @@ class FocalLoss(nn.Module):
 
     def forward(self, pred, true):
         loss = self.loss_fn(pred, true)
-        pred_prob = torch.sigmoid_(loss)
+        pred_prob = torch.sigmoid_(pred)
         p_t = true * pred_prob + (1 - true) * (1 - pred_prob)
         alpha_factor = true * self.alpha + (1 - true) * (1 - self.alpha)
-        gamma_factor = (1 - p_t) ** self.gamma
-        p_t *= alpha_factor * gamma_factor
+        gamma_factor = (1.0 - p_t) ** self.gamma
+        loss *= alpha_factor * gamma_factor
         if self.reduction == 'mean':
             return loss.mean()
         elif self.reduction == 'sum':
