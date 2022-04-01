@@ -18,18 +18,19 @@ class Exp(BaseExp):
 
         # ---------------- model config ---------------- #
         self.num_classes = 3
-        self.depth = 1.00
-        self.width = 1.00
+        self.depth = 0.67
+        self.width = 0.75
 
         # ---------------- dataloader config ---------------- #
         # set worker to 4 for shorter dataloader init time
         self.data_num_workers = 4
-        self.input_size = (1024, 1024)
+        self.input_size = (1280, 1280)
         self.random_size = None
-        self.train_ann = "3.json"
-        self.val_ann = "3.json"
-        self.data_dir = 'data'
-        self.name = os.path.join('images', '3')
+        self.train_ann = "train_data.json"
+        self.val_ann = "test_data.json"
+        self.data_dir = os.path.join('..', 'yolo5', 'datav5', 'zumen')
+        self.name = os.path.join('train', 'images')
+        self.val_name = os.path.join('test', 'images')
 
         # --------------- transform config ----------------- #
         self.degrees = 0.0
@@ -57,7 +58,7 @@ class Exp(BaseExp):
         self.exp_name = os.path.split(os.path.realpath(__file__))[1].split(".")[0]
 
         # -----------------  testing config ------------------ #
-        self.test_size = (1024, 1024)
+        self.test_size = (1280, 1280)
         self.test_conf = 0.01
         self.nmsthre = 0.65
 
@@ -160,7 +161,7 @@ class Exp(BaseExp):
             #     pg0, lr=lr, momentum=self.momentum, nesterov=True
             # )
             optimizer = torch.optim.Adam(
-               params=pg0, lr=lr, betas=(0.9, 0.99))
+                params=pg0, lr=lr, betas=(0.9, 0.99))
             optimizer.add_param_group(
                 {"params": pg1, "weight_decay": self.weight_decay}
             )  # add pg1 with weight_decay
@@ -188,9 +189,9 @@ class Exp(BaseExp):
         from yolox.data import COCODataset, ValTransform
 
         valdataset = COCODataset(
-            data_dir=None,
-            json_file=self.val_ann if not testdev else "image_info_test-dev2017.json",
-            name="val2017" if not testdev else "test2017",
+            data_dir=self.data_dir,
+            json_file=self.val_ann,
+            name=self.val_name,
             img_size=self.test_size,
             preproc=ValTransform(
                 rgb_means=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
