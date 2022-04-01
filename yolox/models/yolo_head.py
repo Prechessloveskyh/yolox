@@ -421,7 +421,7 @@ class YOLOXHead(nn.Module):
                        self.iou_loss(bbox_preds.view(-1, 4)[fg_masks], reg_targets)
                    ).sum() / num_fg
         loss_obj = (
-                       self.bcewithlog_loss(obj_preds.view(-1, 1), obj_targets)
+                       self.cls_bcewithlog_loss(obj_preds.view(-1, 1), obj_targets)
                    ).sum() / num_fg
         loss_cls = (
 
@@ -430,7 +430,6 @@ class YOLOXHead(nn.Module):
                        )
 
                    ).sum() / num_fg
-        print(loss_cls)
         if self.use_l1:
             loss_l1 = (
                           self.l1_loss(origin_preds.view(-1, 4)[fg_masks], l1_targets)
