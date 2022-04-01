@@ -57,7 +57,7 @@ class TrainTransform:
                          always_apply=False, p=0.1),
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
-            A.ImageCompression(quality_lower=0.75,p=0.1),
+            A.ImageCompression(quality_lower=75, p=0.1),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
@@ -68,7 +68,7 @@ class TrainTransform:
             A.VerticalFlip(p=0.4),
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
-            A.ImageCompression(quality_lower=0.75,p=0.1),
+            A.ImageCompression(quality_lower=75, p=0.1),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
