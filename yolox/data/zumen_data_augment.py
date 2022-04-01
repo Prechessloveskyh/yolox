@@ -50,29 +50,29 @@ class TrainTransform:
         self.p = p
         self.max_labels = max_labels
         self.transform = A.Compose([
-            A.GaussianBlur(blur_limit=(3, 7), p=0.1),
-            A.HorizontalFlip(p=0.1),
-            A.VerticalFlip(p=0.1),
+            A.GaussianBlur(blur_limit=(3, 7), p=0.05),
+            A.HorizontalFlip(p=0.05),
+            A.VerticalFlip(p=0.05),
             A.RandomCrop(height=self.image_size[0], width=self.image_size[1],
-                         always_apply=False, p=0.05),
+                         always_apply=False, p=0.01),
             A.Resize(height=self.image_size[0], width=self.image_size[1],
                      interpolation=cv2.INTER_CUBIC, always_apply=True),
-            A.ImageCompression(quality_lower=85, p=0.1),
+            A.ImageCompression(quality_lower=85, p=0.05),
             A.ToFloat(max_value=255, always_apply=True),
             A.Normalize(mean=rgb_means, std=std, always_apply=True)
         ],
             bbox_params=A.BboxParams(format='coco', min_visibility=0.4, label_fields=['class_labels']))
-        self.truncated_transform = A.Compose([
-            A.GaussianBlur(blur_limit=(3, 7), p=0.1),
-            A.HorizontalFlip(p=0.1),
-            A.VerticalFlip(p=0.1),
-            A.Resize(height=self.image_size[0], width=self.image_size[1],
-                     interpolation=cv2.INTER_CUBIC, always_apply=True),
-            A.ImageCompression(quality_lower=85, p=0.1),
-            A.ToFloat(max_value=255, always_apply=True),
-            A.Normalize(mean=rgb_means, std=std, always_apply=True)
-        ],
-            bbox_params=A.BboxParams(format='coco', min_visibility=0.4, label_fields=['class_labels']))
+        # self.truncated_transform = A.Compose([
+        #     A.GaussianBlur(blur_limit=(3, 7), p=0.1),
+        #     A.HorizontalFlip(p=0.1),
+        #     A.VerticalFlip(p=0.1),
+        #     A.Resize(height=self.image_size[0], width=self.image_size[1],
+        #              interpolation=cv2.INTER_CUBIC, always_apply=True),
+        #     A.ImageCompression(quality_lower=85, p=0.1),
+        #     A.ToFloat(max_value=255, always_apply=True),
+        #     A.Normalize(mean=rgb_means, std=std, always_apply=True)
+        # ],
+        #     bbox_params=A.BboxParams(format='coco', min_visibility=0.4, label_fields=['class_labels']))
         self.swap = (2, 0, 1)
 
     def __call__(self, image, targets, input_dim):
@@ -83,6 +83,22 @@ class TrainTransform:
         boxes = targets[:, :4].copy()
         labels = targets[:, 4].copy()
         boxes = xyxy2xywh(boxes)
+
+        image_t = copy.deepcopy(image)
+        height, width, _ = image_t.shape
+        boxes = np.array([
+            [x, y, w if x + w <= width else width - x, h if y + h <= height else height - y]
+            for
+            x, y, w, h in boxes])
+        # real_boxes = copy.deepcopy(boxes)
+        # real_labels = copy.deepcopy(labels)
+        padded_labels = np.zeros((self.max_labels, 5))
+        transformed = self.transform(image=image_t,
+                                     bboxes=boxes,
+                                     class_labels=labels)
+        image_t = transformed['image']
+        boxes = np.array(transformed['bboxes'])
+        labels = np.array(transformed['class_labels'])
         if len(boxes) == 0:
             targets = np.zeros((self.max_labels, 5), dtype=np.float32)
             transformed = self.transform(image=image,
@@ -92,32 +108,6 @@ class TrainTransform:
             image = image.transpose(self.swap)
             image = np.ascontiguousarray(image, dtype=np.float32)
             return image, targets
-
-        image_t = copy.deepcopy(image)
-        height, width, _ = image_t.shape
-        boxes = np.array([
-            [x, y, w if x + w <= width else width - x, h if y + h <= height else height - y]
-            for
-            x, y, w, h in boxes])
-        real_boxes = copy.deepcopy(boxes)
-        real_labels = copy.deepcopy(labels)
-        padded_labels = np.zeros((self.max_labels, 5))
-        transformed = self.transform(image=image_t,
-                                     bboxes=boxes,
-                                     class_labels=labels)
-        image_t = transformed['image']
-        boxes = np.array(transformed['bboxes'])
-        labels = np.array(transformed['class_labels'])
-        if len(boxes) == 0:
-            image_t = copy.deepcopy(image)
-            boxes = copy.deepcopy(real_boxes)
-            labels = copy.deepcopy(real_labels)
-            transformed = self.truncated_transform(image=image_t,
-                                                   bboxes=boxes,
-                                                   class_labels=labels)
-            image_t = transformed['image']
-            boxes = np.array(transformed['bboxes'])
-            labels = np.array(transformed['class_labels'])
 
         boxes = xywh2xyxy(boxes)
         boxes = np.int64(boxes)
@@ -130,12 +120,6 @@ class TrainTransform:
         targets_t = np.hstack((labels_t, boxes_t))
         padded_labels[range(len(targets_t))[: self.max_labels]] = targets_t[: self.max_labels]
         padded_labels = np.ascontiguousarray(padded_labels, dtype=np.float32)
-        # image_t += np.min(image_t)
-        # image_t /= (np.max(image_t) - np.min(image_t))
-        # image = copy.deepcopy(image_t)
-        # image *= 255
-        # image = np.array(image).astype(np.uint8)
-        # cv2.imwrite('image.png', image)
         image_t = image_t.transpose(self.swap)
         image_t = np.ascontiguousarray(image_t, dtype=np.float32)
         return image_t, padded_labels
