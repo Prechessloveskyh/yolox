@@ -32,6 +32,7 @@ class FocalLoss(nn.Module):
         alpha_factor = true * self.alpha + (1 - true) * (1 - self.alpha)
         gamma_factor = (1.0 - p_t) ** self.gamma
         loss *= alpha_factor * gamma_factor
+
         if self.reduction == 'mean':
             return loss.mean()
         elif self.reduction == 'sum':
@@ -429,6 +430,7 @@ class YOLOXHead(nn.Module):
                        )
 
                    ).sum() / num_fg
+        print(loss_cls)
         if self.use_l1:
             loss_l1 = (
                           self.l1_loss(origin_preds.view(-1, 4)[fg_masks], l1_targets)
